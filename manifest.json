@@ -1,0 +1,18 @@
+{
+  "name": "Control de Notas",
+  "short_name": "Notas",
+  "description": "Calculadora y control predictivo de notas universitarias",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f1318",
+  "theme_color": "#2f5d8a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

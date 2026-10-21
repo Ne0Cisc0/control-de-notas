@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Control de notas</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1b1f24;--mute:#667085;--line:#e1e5ea;--ac:#2f5d8a;--g:#c6f6d5;--gt:#1f6b3a;--y:#fefcbf;--yt:#7a5b00;--r:#fed7d7;--rt:#9b2c2c;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1318;--card:#171c23;--ink:#e8ebef;--mute:#9aa4b2;--line:#2a313b;--ac:#7fb0e0;--g:#16442b;--gt:#9ae6b4;--y:#4a420f;--yt:#f6e58d;--r:#4d1f1f;--rt:#feb2b2;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1318;--card:#171c23;--ink:#e8ebef;--mute:#9aa4b2;--line:#2a313b;--ac:#7fb0e0;--g:#16442b;--gt:#9ae6b4;--y:#4a420f;--yt:#f6e58d;--r:#4d1f1f;--rt:#feb2b2;color-scheme:dark}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:16px 14px 28px}
+h1{font-size:22px;margin:0}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.sub,#st{color:var(--mute);font-size:13px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.tile span{display:block;color:var(--mute);font-size:12px}
+.tile b{font-size:22px;font-variant-numeric:tabular-nums}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.card header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+h2{font-size:14px;margin:0;letter-spacing:.02em}
+.chip{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--y);color:var(--yt);white-space:nowrap}
+.chip.ok{background:var(--g);color:var(--gt)}
+.chip.bad{background:var(--r);color:var(--rt)}
+.chip.info{background:rgba(47,93,138,0.18);color:var(--ac)}
+:root[data-theme="dark"] .chip.info,
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip.info{background:rgba(127,176,224,0.2);color:var(--ac)}}
+.corte{display:grid;grid-template-columns:62px 1fr 50px;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line)}
+.lbl{font-size:12px;color:var(--mute)}
+.ins{display:flex;gap:8px}
+.ins label{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+.ins small{font-size:11px;color:var(--mute);margin-top:2px}
+input{width:100%;min-width:0;height:44px;text-align:center;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+input:focus{outline:2px solid var(--ac);outline-offset:1px}
+input.bad{border-color:var(--rt);outline:2px solid var(--rt)}
+input.sim{border-style:dashed;border-color:var(--ac);background:rgba(47,93,138,0.08);color:var(--ac);font-weight:600}
+:root[data-theme="dark"] input.sim,
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) input.sim{background:rgba(127,176,224,0.14)}}
+.tot{text-align:right;font-variant-numeric:tabular-nums}
+.card footer{display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--line);padding-top:8px}
+.card footer span{display:block;font-size:12px;color:var(--mute)}
+.card footer b{display:inline-block;font-size:20px;padding:1px 10px;border-radius:8px;font-variant-numeric:tabular-nums}
+.g{background:var(--g)!important;color:var(--gt)!important}
+.y{background:var(--y)!important;color:var(--yt)!important}
+.r{background:var(--r)!important;color:var(--rt)!important}
+.pred{margin-top:10px;padding:9px 11px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-size:12px;line-height:1.45}
+.pred-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pred-main{color:var(--ink);flex:1}
+.pred-main b{color:var(--ink);font-variant-numeric:tabular-nums}
+.pred-sub{color:var(--mute);font-size:11px;margin-top:4px}
+.pred-sub b{color:var(--ink);font-variant-numeric:tabular-nums}
+.btn-sim{background:transparent;border:1px solid var(--line);color:var(--ac);font:inherit;font-size:11px;font-weight:600;padding:3px 8px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .15s ease}
+.btn-sim:hover{background:var(--card);border-color:var(--ac)}
+.btn-sim.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+.btn-top{background:var(--card);border:1px solid var(--line);color:var(--ink);font:inherit;font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;cursor:pointer;transition:all .15s ease}
+.btn-top:hover{border-color:var(--ac);color:var(--ac)}
+.btn-top.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+.top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sim-leg{border:1px dashed var(--ac);color:var(--ac);padding:2px 8px;border-radius:99px}
+details{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+summary{cursor:pointer;font-weight:600}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;margin-top:8px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;text-align:right;border-top:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mute);font-weight:500;font-size:12px}
+.leg{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;font-size:12px}
+.leg span{padding:3px 10px;border-radius:99px}
+</style>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f5d8a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Control de Notas">
+<link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+<main>
+  <div class="top">
+    <div><h1>Control de notas</h1><div class="sub">Escala 0–20 · se aprueba con 9,5 pts · Calculadora predictiva</div></div>
+    <div class="top-right">
+      <button id="btnSimAll" type="button" class="btn-top" title="Simula en un clic las notas mínimas para aprobar en todas las materias">⚡ Simular aprobaciones</button>
+      <div id="st">Cargando…</div>
+    </div>
+  </div>
+  <section class="sum">
+    <div class="tile"><span>Acumulado prom.</span><b id="sK">0,00</b></div>
+    <div class="tile"><span>Definitiva prom.</span><b id="sL">0,00</b></div>
+    <div class="tile"><span>Aprobadas</span><b id="sA">0 de 7</b></div>
+  </section>
+  <section id="grid"></section>
+  <details>
+    <summary>Promedios por evaluación</summary>
+    <div class="wrap"><table id="avg"></table></div>
+  </details>
+  <div class="leg">
+    <span class="g">14 a 20 · Sobresaliente</span>
+    <span class="y">9,5 a 13,9 · Aprobado regular</span>
+    <span class="r">0,1 a 9,4 · Reprobado</span>
+    <span class="sim-leg">Borde azul discontinuo · Simulación</span>
+  </div>
+</main>
+<script>
+const MAT=["ELECTIVA III","ESTRUCTURA DE DATOS","METODOLOGÍA II","PROGRAMACIÓN II","SISTEMAS ELÉCTRICOS","SISTEMAS OPERATIVOS","TEORÍA DE LA INFORMACIÓN"];
+const CORTES=["1er corte","2do corte","3er corte"];
+const W=[[.1,.2],[.1,.2],[.2,.2]],MIN=9.5;
+const FLAT_W=[W[0][0],W[0][1],W[1][0],W[1][1],W[2][0],W[2][1]];
+const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
+const r4=x=>Math.round(x*1e4)/1e4;
+const f2=x=>x.toFixed(2).replace(".",",");
+const cls=v=>v==null||v<0.01?"":v>=14?"g":v>=MIN?"y":"r";
+const ceil2=x=>Math.max(0,Math.ceil((x-1e-7)*100)/100);
+
+let S=MAT.map(()=>Array(6).fill(null));
+let SIM=MAT.map(()=>Array(6).fill(null));
+let dirty=false,busy=false,timer=null,save=async()=>{};
+
+function calc(row){
+  const t=[0,1,2].map(k=>r4((row[2*k]||0)*W[k][0]+(row[2*k+1]||0)*W[k][1]));
+  const K=r4(t[0]+t[1]+t[2]);
+  const L=Math.round(K);
+
+  let remWeight=0,remCount=0,filledCount=0;
+  for(let j=0;j<6;j++){
+    if(row[j]===null||row[j]===undefined){
+      remWeight+=FLAT_W[j];
+      remCount++;
+    }else{
+      filledCount++;
+    }
+  }
+  remWeight=r4(remWeight);
+  const remPct=Math.round(remWeight*100);
+  const max=r4(K+20*remWeight);
+
+  let need=null;
+  if(K>=MIN){
+    need=0;
+  }else if(remWeight>0){
+    need=ceil2((MIN-K)/remWeight);
+  }
+
+  let need14=null;
+  if(K>=14){
+    need14=0;
+  }else if(remWeight>0){
+    need14=ceil2((14-K)/remWeight);
+  }
+
+  return{t,K,L,remWeight,remCount,filledCount,remPct,max,need,need14};
+}
+
+const grid=$("#grid");
+MAT.forEach((m,i)=>{
+  const a=document.createElement("article");
+  a.className="card";a.id="c"+i;
+  a.innerHTML='<header><h2>'+m+'</h2><span class="chip"></span></header>'+
+    [0,1,2].map(k=>'<div class="corte"><span class="lbl">'+CORTES[k]+'</span><div class="ins">'+
+      [0,1].map(j=>'<label><input inputmode="decimal" autocomplete="off" data-i="'+i+'" data-j="'+(2*k+j)+'" aria-label="'+m+', '+CORTES[k]+', nota '+(j+1)+'" placeholder="–"><small>'+Math.round(W[k][j]*100)+'%</small></label>').join("")+
+      '</div><b class="tot"></b></div>').join("")+
+    '<footer><div><span>Acumulado</span><b class="K"></b></div><div><span>Definitiva</span><b class="L"></b></div></footer>'+
+    '<div class="pred"><div class="pred-head"><div class="pred-main"></div><button type="button" class="btn-sim" data-i="'+i+'">⚡ Simular</button></div><div class="pred-sub"></div></div>';
+  grid.appendChild(a);
+});
+
+function paint(i){
+  const a=$("#c"+i);
+  const realC=calc(S[i]);
+  const isSim=SIM[i].some(v=>v!==null);
+  const effRow=S[i].map((v,j)=>v!==null?v:SIM[i][j]);
+  const c=isSim?calc(effRow):realC;
+
+  $$("input",a).forEach(inp=>{
+    const j=+inp.dataset.j;
+    if(S[i][j]!==null){
+      inp.className=cls(S[i][j]);
+    }else if(SIM[i][j]!==null){
+      inp.className="sim";
+    }else{
+      inp.className="";
+    }
+  });
+
+  $$(".tot",a).forEach((e,k)=>e.textContent=f2(c.t[k]));
+  const K=$(".K",a),L=$(".L",a),ch=$(".chip",a);
+  K.textContent=f2(c.K)+(isSim?" *":"");
+  K.className="K "+cls(c.K);
+  L.textContent=c.L+(isSim?" *":"");
+  L.className="L "+cls(c.L);
+
+  if(isSim){
+    ch.textContent="Simulado: Def. "+c.L;
+    ch.className="chip info";
+  }else if(realC.remCount===0){
+    if(realC.K>=MIN){
+      ch.textContent=(realC.K>=14?"Sobresaliente (":"Aprobada (")+realC.L+")";
+      ch.className="chip ok";
+    }else{
+      ch.textContent="Reprobada ("+realC.L+")";
+      ch.className="chip bad";
+    }
+  }else if(realC.K>=MIN){
+    ch.textContent=realC.K>=14?"¡Sobresaliente!":"¡Aprobada!";
+    ch.className="chip ok";
+  }else if(realC.need>20){
+    ch.textContent="No alcanzable";
+    ch.className="chip bad";
+  }else if(realC.filledCount===0){
+    ch.textContent="Mín. 9,50";
+    ch.className="chip";
+  }else{
+    ch.textContent="Mín. "+f2(realC.need)+" / 20";
+    ch.className="chip";
+  }
+
+  const pMain=$(".pred-main",a),pSub=$(".pred-sub",a),btnSim=$(".btn-sim",a);
+  if(isSim){
+    const simVal=SIM[i].find(v=>v!==null);
+    pMain.innerHTML="⚡ <b>Simulación activa:</b> Con <b>"+f2(simVal)+" / 20</b> en pendientes, logras acumulado de <b>"+f2(c.K)+"</b> (Definitiva: <b>"+c.L+"</b>).";
+    pSub.textContent="Esta nota es solo una proyección temporal y no se guarda.";
+    btnSim.textContent="↺ Quitar";
+    btnSim.className="btn-sim active";
+    btnSim.style.display="inline-flex";
+  }else if(realC.remCount===0){
+    if(realC.K>=14){
+      pMain.innerHTML="🏆 <b>Materia finalizada con Sobresaliente.</b>";
+    }else if(realC.K>=MIN){
+      pMain.innerHTML="✅ <b>Materia finalizada y aprobada.</b>";
+    }else{
+      pMain.innerHTML="❌ <b>Materia finalizada y reprobada.</b>";
+    }
+    pSub.innerHTML="Calificación definitiva: <b>"+realC.L+" pts</b> (Acumulado: "+f2(realC.K)+").";
+    btnSim.style.display="none";
+  }else if(realC.K>=MIN){
+    pMain.innerHTML="🎉 <b>¡Materia aprobada!</b> Ya aseguraste los 9,5 pts mínimos requeridos.";
+    if(realC.need14<=20){
+      pSub.innerHTML="Máx. posible: <b>"+f2(realC.max)+"</b> · Para sobresaliente (14): mín. <b>"+f2(realC.need14)+" / 20</b> en lo restante ("+realC.remPct+"%).";
+      btnSim.textContent="⚡ Simular para 14";
+      btnSim.className="btn-sim";
+      btnSim.style.display="inline-flex";
+    }else{
+      pSub.innerHTML="Máx. posible: <b>"+f2(realC.max)+"</b> · Sobresaliente (14) ya no es alcanzable.";
+      btnSim.style.display="none";
+    }
+  }else if(realC.need>20){
+    pMain.innerHTML="⚠️ <b>No alcanzable para aprobar:</b> Faltan "+f2(MIN-realC.K)+" pts acumulados.";
+    pSub.innerHTML="Aun obteniendo 20 en todo lo restante ("+realC.remPct+"%), la nota máxima alcanzable es <b>"+f2(realC.max)+"</b>.";
+    btnSim.style.display="none";
+  }else{
+    const evalDesc=realC.remCount===1?"en la evaluación pendiente ("+realC.remPct+"%)":"de promedio en las "+realC.remCount+" evaluaciones restantes ("+realC.remPct+"%)";
+    pMain.innerHTML="🎯 <b>Para aprobar (9,5):</b> necesitas mín. <b>"+f2(realC.need)+" / 20</b> "+evalDesc+".";
+    pSub.innerHTML="Máx. alcanzable: <b>"+f2(realC.max)+"</b>"+(realC.need14<=20?" · Para sobresaliente (14): mín. <b>"+f2(realC.need14)+"</b>":"");
+    btnSim.textContent="⚡ Simular mínima";
+    btnSim.className="btn-sim";
+    btnSim.style.display="inline-flex";
+  }
+}
+
+function summary(){
+  const anySim=SIM.some(r=>r.some(v=>v!==null));
+  const cs=S.map((r,i)=>calc(r.map((v,j)=>v!==null?v:SIM[i][j])));
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  $("#sK").textContent=f2(avg(cs.map(c=>c.K)))+(anySim?" *":"");
+  $("#sL").textContent=f2(avg(cs.map(c=>c.L)))+(anySim?" *":"");
+  $("#sA").textContent=cs.filter(c=>c.K>=MIN).length+" de "+MAT.length+(anySim?" *":"");
+  const m=a=>{const v=avg(a);return v==null?"–":f2(v)};
+  let h="<tr><th></th><th>Nota 1</th><th>Nota 2</th><th>Total</th></tr>";
+  [0,1,2].forEach(k=>{
+    const col=j=>cs.map((_,i)=>(S[i][j]!==null?S[i][j]:SIM[i][j])).filter(v=>v!=null);
+    h+="<tr><td>"+CORTES[k]+"</td><td>"+m(col(2*k))+"</td><td>"+m(col(2*k+1))+"</td><td>"+f2(avg(cs.map(c=>c.t[k])))+"</td></tr>";
+  });
+  $("#avg").innerHTML=h;
+}
+
+function fill(i){
+  $$("input",$("#c"+i)).forEach(inp=>{
+    if(document.activeElement===inp)return;
+    const j=+inp.dataset.j;
+    const v=S[i][j];
+    const s=SIM[i][j];
+    if(v!=null){
+      inp.value=String(v).replace(".",",");
+      inp.classList.remove("sim");
+    }else if(s!=null){
+      inp.value=String(s).replace(".",",");
+      inp.classList.add("sim");
+    }else{
+      inp.value="";
+      inp.classList.remove("sim");
+    }
+    inp.classList.remove("bad");
+  });
+  paint(i);
+}
+
+function all(){
+  MAT.forEach((_,i)=>fill(i));
+  summary();
+  updateSimAllBtn();
+}
+
+function toggleSim(i){
+  const realC=calc(S[i]);
+  const isSim=SIM[i].some(v=>v!==null);
+  if(isSim){
+    SIM[i]=Array(6).fill(null);
+  }else{
+    let target=null;
+    if(realC.K<MIN&&realC.need<=20){
+      target=realC.need;
+    }else if(realC.K>=MIN&&realC.need14<=20){
+      target=realC.need14;
+    }
+    if(target!==null){
+      for(let j=0;j<6;j++){
+        if(S[i][j]===null)SIM[i][j]=target;
+      }
+    }
+  }
+  fill(i);
+  summary();
+  updateSimAllBtn();
+}
+
+function updateSimAllBtn(){
+  const btn=$("#btnSimAll");
+  if(!btn)return;
+  const anySim=SIM.some(row=>row.some(v=>v!==null));
+  btn.textContent=anySim?"↺ Quitar simulaciones":"⚡ Simular aprobaciones";
+  btn.classList.toggle("active",anySim);
+}
+
+grid.addEventListener("click",e=>{
+  const btn=e.target.closest(".btn-sim");
+  if(!btn)return;
+  const i=+btn.dataset.i;
+  toggleSim(i);
+});
+
+$("#btnSimAll").addEventListener("click",()=>{
+  const anySim=SIM.some(row=>row.some(v=>v!==null));
+  if(anySim){
+    SIM=MAT.map(()=>Array(6).fill(null));
+  }else{
+    MAT.forEach((_,i)=>{
+      const realC=calc(S[i]);
+      if(realC.remCount>0&&realC.K<MIN&&realC.need<=20){
+        for(let j=0;j<6;j++){
+          if(S[i][j]===null)SIM[i][j]=realC.need;
+        }
+      }
+    });
+  }
+  all();
+});
+
+const setStatus=t=>{$("#st").textContent=t};
+
+grid.addEventListener("input",e=>{
+  const t=e.target;
+  if(!t.dataset.j)return;
+  const i=+t.dataset.i,j=+t.dataset.j,s=t.value.replace(",",".").trim();
+  let n=null,bad=false;
+  if(s!==""){n=Number(s);if(isNaN(n)||n<0||n>20){n=null;bad=true}}
+  SIM[i]=Array(6).fill(null);
+  S[i][j]=n;
+  t.classList.remove("sim");
+  fill(i);
+  summary();
+  updateSimAllBtn();
+  t.classList.toggle("bad",bad);
+  queueSave();
+});
+
+function queueSave(){
+  dirty=true;setStatus("Guardando…");
+  clearTimeout(timer);timer=setTimeout(flush,600);
+}
+async function flush(){
+  if(busy){timer=setTimeout(flush,300);return}
+  busy=true;
+  const snap=JSON.stringify(S);
+  try{await save(JSON.parse(snap));setStatus("Guardado ✓")}
+  catch(e){setStatus("No se pudo guardar")}
+  busy=false;
+  if(JSON.stringify(S)!==snap)queueSave();else dirty=false;
+}
+
+async function init(){
+  all();
+  let db=null,user=null;
+  try{if(window.claude&&claude.use){db=await claude.use("db");user=await claude.use("user")}}catch(e){}
+  if(db&&user){
+    try{
+      const id=await user.id();
+      const ref=db.collection("data/users/"+id).doc("notas");
+      save=d=>ref.set({g:d});
+      ref.onSnapshot(s=>{
+        if(dirty||busy)return;
+        const d=s.exists?s.data():null,g=d&&d.g;
+        if(Array.isArray(g)&&g.length===MAT.length){
+          S=g.map(r=>Array.from({length:6},(_,j)=>typeof r[j]==="number"?r[j]:null));
+          all();
+        }
+        setStatus("Sincronizado ✓");
+      },()=>setStatus("Sin sincronización"));
+      return;
+    }catch(e){}
+  }
+  try{
+    const g=JSON.parse(localStorage.getItem("notas-v1"));
+    if(Array.isArray(g)&&g.length===MAT.length){S=g;all()}
+  }catch(e){}
+  save=async d=>{localStorage.setItem("notas-v1",JSON.stringify(d))};
+  setStatus("Guardado solo en este dispositivo");
+}
+init();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
