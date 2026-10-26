@@ -16,14 +16,16 @@ main{max-width:1100px;margin:0 auto;padding:16px 14px 28px}
 h1{font-size:22px;margin:0}
 .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .sub,#st{color:var(--mute);font-size:13px}
-.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .tile span{display:block;color:var(--mute);font-size:12px}
 .tile b{font-size:22px;font-variant-numeric:tabular-nums}
+.tile small{display:block;color:var(--mute);font-size:11px;margin-top:2px}
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
-.card header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.card header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
 h2{font-size:14px;margin:0;letter-spacing:.02em}
+.card-sub-ent{font-size:11px;color:var(--mute);margin-top:2px}
 .chip{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--y);color:var(--yt);white-space:nowrap}
 .chip.ok{background:var(--g);color:var(--gt)}
 .chip.bad{background:var(--r);color:var(--rt)}
@@ -33,11 +35,17 @@ h2{font-size:14px;margin:0;letter-spacing:.02em}
 .corte{display:grid;grid-template-columns:62px 1fr 50px;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line)}
 .lbl{font-size:12px;color:var(--mute)}
 .ins{display:flex;gap:8px}
-.ins label{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
-.ins small{font-size:11px;color:var(--mute);margin-top:2px}
-input{width:100%;min-width:0;height:44px;text-align:center;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.eval-cell{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;position:relative}
+.eval-meta{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:4px;gap:2px;padding:0 1px}
+.eval-meta small{font-size:11px;color:var(--mute);font-weight:500}
+.btn-ent{background:transparent;border:1px solid var(--line);color:var(--mute);font:inherit;font-size:10px;font-weight:600;padding:2px 5px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:2px;transition:all .15s ease;white-space:nowrap;line-height:1.2}
+.btn-ent:hover{border-color:var(--ac);color:var(--ac)}
+.btn-ent.done{background:var(--g);border-color:var(--gt);color:var(--gt)}
+.btn-ent.graded{background:transparent;border-color:transparent;color:var(--gt);cursor:default}
+input{width:100%;min-width:0;height:44px;text-align:center;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);transition:border-color .15s ease,box-shadow .15s ease}
 input:focus{outline:2px solid var(--ac);outline-offset:1px}
 input.bad{border-color:var(--rt);outline:2px solid var(--rt)}
+input.is-delivered{border-color:var(--gt);box-shadow:0 0 0 1px var(--gt)}
 input.sim{border-style:dashed;border-color:var(--ac);background:rgba(47,93,138,0.08);color:var(--ac);font-weight:600}
 :root[data-theme="dark"] input.sim,
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) input.sim{background:rgba(127,176,224,0.14)}}
@@ -61,7 +69,9 @@ input.sim{border-style:dashed;border-color:var(--ac);background:rgba(47,93,138,0
 .btn-top:hover{border-color:var(--ac);color:var(--ac)}
 .btn-top.active{background:var(--ac);color:#fff;border-color:var(--ac)}
 .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ent-leg{border:1px solid var(--gt);background:var(--g);color:var(--gt);padding:2px 8px;border-radius:99px}
 .sim-leg{border:1px dashed var(--ac);color:var(--ac);padding:2px 8px;border-radius:99px}
+@media (max-width:350px){.btn-ent .ent-txt{display:none}.btn-ent{padding:2px 5px}}
 details{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
 summary{cursor:pointer;font-weight:600}
 .wrap{overflow-x:auto}
@@ -94,6 +104,7 @@ th{color:var(--mute);font-weight:500;font-size:12px}
     <div class="tile"><span>Acumulado prom.</span><b id="sK">0,00</b></div>
     <div class="tile"><span>Definitiva prom.</span><b id="sL">0,00</b></div>
     <div class="tile"><span>Aprobadas</span><b id="sA">0 de 7</b></div>
+    <div class="tile"><span>Entregadas</span><b id="sE">0 de 42</b><small id="sEP">0% completado</small></div>
   </section>
   <section id="grid"></section>
   <details>
@@ -104,6 +115,7 @@ th{color:var(--mute);font-weight:500;font-size:12px}
     <span class="g">14 a 20 · Sobresaliente</span>
     <span class="y">9,5 a 13,9 · Aprobado regular</span>
     <span class="r">0,1 a 9,4 · Reprobado</span>
+    <span class="ent-leg">✓ Entregada</span>
     <span class="sim-leg">Borde azul discontinuo · Simulación</span>
   </div>
 </main>
@@ -119,6 +131,7 @@ const cls=v=>v==null||v<0.01?"":v>=14?"g":v>=MIN?"y":"r";
 const ceil2=x=>Math.max(0,Math.ceil((x-1e-7)*100)/100);
 
 let S=MAT.map(()=>Array(6).fill(null));
+let D=MAT.map(()=>Array(6).fill(false));
 let SIM=MAT.map(()=>Array(6).fill(null));
 let dirty=false,busy=false,timer=null,save=async()=>{};
 
@@ -161,9 +174,13 @@ const grid=$("#grid");
 MAT.forEach((m,i)=>{
   const a=document.createElement("article");
   a.className="card";a.id="c"+i;
-  a.innerHTML='<header><h2>'+m+'</h2><span class="chip"></span></header>'+
+  a.innerHTML='<header><div><h2>'+m+'</h2><div class="card-sub-ent">0 de 6 entregadas</div></div><span class="chip"></span></header>'+
     [0,1,2].map(k=>'<div class="corte"><span class="lbl">'+CORTES[k]+'</span><div class="ins">'+
-      [0,1].map(j=>'<label><input inputmode="decimal" autocomplete="off" data-i="'+i+'" data-j="'+(2*k+j)+'" aria-label="'+m+', '+CORTES[k]+', nota '+(j+1)+'" placeholder="–"><small>'+Math.round(W[k][j]*100)+'%</small></label>').join("")+
+      [0,1].map(j=>'<div class="eval-cell">'+
+        '<input inputmode="decimal" autocomplete="off" data-i="'+i+'" data-j="'+(2*k+j)+'" aria-label="'+m+', '+CORTES[k]+', nota '+(j+1)+'" placeholder="–">'+
+        '<div class="eval-meta"><small>'+Math.round(W[k][j]*100)+'%</small>'+
+        '<button type="button" class="btn-ent" data-i="'+i+'" data-j="'+(2*k+j)+'" title="Marcar si ya entregaste esta evaluación"><span class="ent-ic">○</span> <span class="ent-txt">Por entregar</span></button>'+
+        '</div></div>').join("")+
       '</div><b class="tot"></b></div>').join("")+
     '<footer><div><span>Acumulado</span><b class="K"></b></div><div><span>Definitiva</span><b class="L"></b></div></footer>'+
     '<div class="pred"><div class="pred-head"><div class="pred-main"></div><button type="button" class="btn-sim" data-i="'+i+'">⚡ Simular</button></div><div class="pred-sub"></div></div>';
@@ -179,14 +196,45 @@ function paint(i){
 
   $$("input",a).forEach(inp=>{
     const j=+inp.dataset.j;
-    if(S[i][j]!==null){
+    const isGraded=S[i][j]!==null;
+    const isDelivered=isGraded||Boolean(D[i][j]);
+    if(isGraded){
       inp.className=cls(S[i][j]);
     }else if(SIM[i][j]!==null){
       inp.className="sim";
     }else{
-      inp.className="";
+      inp.className=isDelivered?"is-delivered":"";
     }
   });
+
+  $$(".btn-ent",a).forEach(btn=>{
+    const j=+btn.dataset.j;
+    const isGraded=S[i][j]!==null;
+    const isDelivered=isGraded||Boolean(D[i][j]);
+    if(isGraded){
+      btn.className="btn-ent graded";
+      btn.innerHTML='<span class="ent-ic">✓</span> <span class="ent-txt">Calificada</span>';
+      btn.title="Calificada con "+f2(S[i][j]);
+    }else if(isDelivered){
+      btn.className="btn-ent done";
+      btn.innerHTML='<span class="ent-ic">✓</span> <span class="ent-txt">Entregada</span>';
+      btn.title="Entregada · Esperando calificación (clic para desmarcar)";
+    }else{
+      btn.className="btn-ent";
+      btn.innerHTML='<span class="ent-ic">○</span> <span class="ent-txt">Por entregar</span>';
+      btn.title="Clic para marcar como entregada";
+    }
+  });
+
+  const cardDeliveredCount=S[i].filter((v,j)=>v!==null||D[i][j]).length;
+  const waitingCount=S[i].filter((v,j)=>v===null&&D[i][j]).length;
+  const unsubmittedCount=S[i].filter((v,j)=>v===null&&!D[i][j]).length;
+  const cardEntSub=$(".card-sub-ent",a);
+  if(cardEntSub){
+    let subTxt=cardDeliveredCount+" de 6 entregadas";
+    if(waitingCount>0) subTxt+=" · "+waitingCount+" en espera de nota";
+    cardEntSub.textContent=subTxt;
+  }
 
   $$(".tot",a).forEach((e,k)=>e.textContent=f2(c.t[k]));
   const K=$(".K",a),L=$(".L",a),ch=$(".chip",a);
@@ -240,15 +288,20 @@ function paint(i){
     btnSim.style.display="none";
   }else if(realC.K>=MIN){
     pMain.innerHTML="🎉 <b>¡Materia aprobada!</b> Ya aseguraste los 9,5 pts mínimos requeridos.";
+    let subInfo="Máx. posible: <b>"+f2(realC.max)+"</b>";
     if(realC.need14<=20){
-      pSub.innerHTML="Máx. posible: <b>"+f2(realC.max)+"</b> · Para sobresaliente (14): mín. <b>"+f2(realC.need14)+" / 20</b> en lo restante ("+realC.remPct+"%).";
+      subInfo+=" · Para sobresaliente (14): mín. <b>"+f2(realC.need14)+" / 20</b> en lo restante ("+realC.remPct+"%).";
       btnSim.textContent="⚡ Simular para 14";
       btnSim.className="btn-sim";
       btnSim.style.display="inline-flex";
     }else{
-      pSub.innerHTML="Máx. posible: <b>"+f2(realC.max)+"</b> · Sobresaliente (14) ya no es alcanzable.";
+      subInfo+=" · Sobresaliente (14) ya no es alcanzable.";
       btnSim.style.display="none";
     }
+    if(unsubmittedCount===0&&waitingCount>0){
+      subInfo+=" · <b>¡Todas entregadas! Esperando "+waitingCount+" nota"+(waitingCount>1?"s":"")+".</b>";
+    }
+    pSub.innerHTML=subInfo;
   }else if(realC.need>20){
     pMain.innerHTML="⚠️ <b>No alcanzable para aprobar:</b> Faltan "+f2(MIN-realC.K)+" pts acumulados.";
     pSub.innerHTML="Aun obteniendo 20 en todo lo restante ("+realC.remPct+"%), la nota máxima alcanzable es <b>"+f2(realC.max)+"</b>.";
@@ -256,7 +309,13 @@ function paint(i){
   }else{
     const evalDesc=realC.remCount===1?"en la evaluación pendiente ("+realC.remPct+"%)":"de promedio en las "+realC.remCount+" evaluaciones restantes ("+realC.remPct+"%)";
     pMain.innerHTML="🎯 <b>Para aprobar (9,5):</b> necesitas mín. <b>"+f2(realC.need)+" / 20</b> "+evalDesc+".";
-    pSub.innerHTML="Máx. alcanzable: <b>"+f2(realC.max)+"</b>"+(realC.need14<=20?" · Para sobresaliente (14): mín. <b>"+f2(realC.need14)+"</b>":"");
+    let subInfo="Máx. alcanzable: <b>"+f2(realC.max)+"</b>"+(realC.need14<=20?" · Para sobresaliente (14): mín. <b>"+f2(realC.need14)+"</b>":"");
+    if(unsubmittedCount===0&&waitingCount>0){
+      subInfo+=" · <b>¡Todas entregadas! ("+waitingCount+" en espera de nota)</b>";
+    }else if(waitingCount>0){
+      subInfo+=" · 📋 "+waitingCount+" entregada"+(waitingCount>1?"s":"")+" esperando nota";
+    }
+    pSub.innerHTML=subInfo;
     btnSim.textContent="⚡ Simular mínima";
     btnSim.className="btn-sim";
     btnSim.style.display="inline-flex";
@@ -270,6 +329,20 @@ function summary(){
   $("#sK").textContent=f2(avg(cs.map(c=>c.K)))+(anySim?" *":"");
   $("#sL").textContent=f2(avg(cs.map(c=>c.L)))+(anySim?" *":"");
   $("#sA").textContent=cs.filter(c=>c.K>=MIN).length+" de "+MAT.length+(anySim?" *":"");
+
+  let totalEnt=0,totalGraded=0;
+  const totalAll=MAT.length*6;
+  S.forEach((row,i)=>{
+    row.forEach((v,j)=>{
+      if(v!==null){totalGraded++;totalEnt++;}
+      else if(D[i][j]){totalEnt++;}
+    });
+  });
+  const waiting=totalEnt-totalGraded;
+  const pctEnt=Math.round((totalEnt/totalAll)*100);
+  $("#sE").textContent=totalEnt+" de "+totalAll;
+  $("#sEP").textContent=pctEnt+"% entregado"+(waiting>0?" ("+waiting+" esperando nota)":"");
+
   const m=a=>{const v=avg(a);return v==null?"–":f2(v)};
   let h="<tr><th></th><th>Nota 1</th><th>Nota 2</th><th>Total</th></tr>";
   [0,1,2].forEach(k=>{
@@ -338,6 +411,16 @@ function updateSimAllBtn(){
 }
 
 grid.addEventListener("click",e=>{
+  const btnEnt=e.target.closest(".btn-ent");
+  if(btnEnt){
+    const i=+btnEnt.dataset.i,j=+btnEnt.dataset.j;
+    if(S[i][j]!==null)return;
+    D[i][j]=!D[i][j];
+    paint(i);
+    summary();
+    queueSave();
+    return;
+  }
   const btn=e.target.closest(".btn-sim");
   if(!btn)return;
   const i=+btn.dataset.i;
@@ -371,6 +454,7 @@ grid.addEventListener("input",e=>{
   if(s!==""){n=Number(s);if(isNaN(n)||n<0||n>20){n=null;bad=true}}
   SIM[i]=Array(6).fill(null);
   S[i][j]=n;
+  if(n!==null) D[i][j]=true;
   t.classList.remove("sim");
   fill(i);
   summary();
@@ -386,39 +470,60 @@ function queueSave(){
 async function flush(){
   if(busy){timer=setTimeout(flush,300);return}
   busy=true;
-  const snap=JSON.stringify(S);
-  try{await save(JSON.parse(snap));setStatus("Guardado ✓")}
-  catch(e){setStatus("No se pudo guardar")}
+  const snapS=JSON.stringify(S);
+  const snapD=JSON.stringify(D);
+  try{
+    await save({g:JSON.parse(snapS),d:JSON.parse(snapD)});
+    setStatus("Guardado ✓");
+  }catch(e){
+    setStatus("No se pudo guardar");
+  }
   busy=false;
-  if(JSON.stringify(S)!==snap)queueSave();else dirty=false;
+  if(JSON.stringify(S)!==snapS||JSON.stringify(D)!==snapD)queueSave();else dirty=false;
 }
 
 async function init(){
+  try{
+    const g=JSON.parse(localStorage.getItem("notas-v1"));
+    if(Array.isArray(g)&&g.length===MAT.length){S=g}
+  }catch(e){}
+  try{
+    const ent=JSON.parse(localStorage.getItem("entregas-v1"));
+    if(Array.isArray(ent)&&ent.length===MAT.length){
+      D=ent.map(r=>Array.from({length:6},(_,j)=>Boolean(r[j])));
+    }
+  }catch(e){}
+  S.forEach((row,i)=>{
+    row.forEach((v,j)=>{if(v!==null)D[i][j]=true});
+  });
   all();
+
   let db=null,user=null;
   try{if(window.claude&&claude.use){db=await claude.use("db");user=await claude.use("user")}}catch(e){}
   if(db&&user){
     try{
       const id=await user.id();
       const ref=db.collection("data/users/"+id).doc("notas");
-      save=d=>ref.set({g:d});
+      save=d=>ref.set({g:d.g,d:d.d});
       ref.onSnapshot(s=>{
         if(dirty||busy)return;
-        const d=s.exists?s.data():null,g=d&&d.g;
+        const data=s.exists?s.data():null,g=data&&data.g,ent=data&&data.d;
         if(Array.isArray(g)&&g.length===MAT.length){
           S=g.map(r=>Array.from({length:6},(_,j)=>typeof r[j]==="number"?r[j]:null));
-          all();
         }
+        if(Array.isArray(ent)&&ent.length===MAT.length){
+          D=ent.map(r=>Array.from({length:6},(_,j)=>Boolean(r[j])));
+        }
+        all();
         setStatus("Sincronizado ✓");
       },()=>setStatus("Sin sincronización"));
       return;
     }catch(e){}
   }
-  try{
-    const g=JSON.parse(localStorage.getItem("notas-v1"));
-    if(Array.isArray(g)&&g.length===MAT.length){S=g;all()}
-  }catch(e){}
-  save=async d=>{localStorage.setItem("notas-v1",JSON.stringify(d))};
+  save=async d=>{
+    localStorage.setItem("notas-v1",JSON.stringify(d.g));
+    localStorage.setItem("entregas-v1",JSON.stringify(d.d));
+  };
   setStatus("Guardado solo en este dispositivo");
 }
 init();
