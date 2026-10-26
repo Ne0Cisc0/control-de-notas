@@ -35,20 +35,29 @@ h2{font-size:14px;margin:0;letter-spacing:.02em}
 .corte{display:grid;grid-template-columns:62px 1fr 50px;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line)}
 .lbl{font-size:12px;color:var(--mute)}
 .ins{display:flex;gap:8px}
-.eval-cell{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;position:relative}
-.eval-meta{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:4px;gap:2px;padding:0 1px}
-.eval-meta small{font-size:11px;color:var(--mute);font-weight:500}
-.btn-ent{background:transparent;border:1px solid var(--line);color:var(--mute);font:inherit;font-size:10px;font-weight:600;padding:2px 5px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:2px;transition:all .15s ease;white-space:nowrap;line-height:1.2}
-.btn-ent:hover{border-color:var(--ac);color:var(--ac)}
-.btn-ent.done{background:var(--g);border-color:var(--gt);color:var(--gt)}
-.btn-ent.graded{background:transparent;border-color:transparent;color:var(--gt);cursor:default}
-input{width:100%;min-width:0;height:44px;text-align:center;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);transition:border-color .15s ease,box-shadow .15s ease}
-input:focus{outline:2px solid var(--ac);outline-offset:1px}
-input.bad{border-color:var(--rt);outline:2px solid var(--rt)}
-input.is-delivered{border-color:var(--gt);box-shadow:0 0 0 1px var(--gt)}
-input.sim{border-style:dashed;border-color:var(--ac);background:rgba(47,93,138,0.08);color:var(--ac);font-weight:600}
-:root[data-theme="dark"] input.sim,
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) input.sim{background:rgba(127,176,224,0.14)}}
+.eval-box{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;padding:4px 3px 6px;border-radius:12px;border:1px solid transparent;background:transparent;transition:all .15s ease}
+.eval-box.is-delivered{background:rgba(31,107,58,0.08);border-color:var(--gt)}
+.eval-box.is-graded{background:rgba(47,93,138,0.04)}
+:root[data-theme="dark"] .eval-box.is-delivered,
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .eval-box.is-delivered{background:rgba(154,230,180,0.1);border-color:var(--gt)}
+  :root:not([data-theme="light"]) .eval-box.is-graded{background:rgba(127,176,224,0.05)}
+}
+.eval-top{width:100%;text-align:center;margin-bottom:3px}
+.eval-top small{font-size:11px;color:var(--mute);font-weight:600}
+.grade-inp{width:100%;min-width:0;height:42px;text-align:center;font:inherit;font-size:16px;font-weight:600;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);transition:border-color .15s ease,box-shadow .15s ease}
+.grade-inp:focus{outline:2px solid var(--ac);outline-offset:1px}
+.grade-inp.bad{border-color:var(--rt);outline:2px solid var(--rt)}
+.grade-inp.sim{border-style:dashed;border-color:var(--ac);background:rgba(47,93,138,0.08);color:var(--ac);font-weight:600}
+:root[data-theme="dark"] .grade-inp.sim,
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .grade-inp.sim{background:rgba(127,176,224,0.14)}}
+.ent-check{display:inline-flex;align-items:center;justify-content:center;gap:5px;margin-top:5px;padding:3px 6px;border-radius:8px;cursor:pointer;user-select:none;font-size:11px;font-weight:600;color:var(--mute);transition:all .15s ease;width:100%}
+.ent-check:hover{color:var(--ink);background:rgba(0,0,0,0.04)}
+:root[data-theme="dark"] .ent-check:hover,
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ent-check:hover{background:rgba(255,255,255,0.06)}}
+.ent-check input[type="checkbox"]{width:16px;height:16px;margin:0;cursor:pointer;accent-color:var(--gt);flex-shrink:0}
+.eval-box.is-delivered .ent-check{color:var(--gt)}
+.eval-box.is-graded .ent-check{color:var(--gt)}
 .tot{text-align:right;font-variant-numeric:tabular-nums}
 .card footer{display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--line);padding-top:8px}
 .card footer span{display:block;font-size:12px;color:var(--mute)}
@@ -115,7 +124,7 @@ th{color:var(--mute);font-weight:500;font-size:12px}
     <span class="g">14 a 20 · Sobresaliente</span>
     <span class="y">9,5 a 13,9 · Aprobado regular</span>
     <span class="r">0,1 a 9,4 · Reprobado</span>
-    <span class="ent-leg">✓ Entregada</span>
+    <span class="ent-leg">☑ Casilla: Entregada (esperando nota)</span>
     <span class="sim-leg">Borde azul discontinuo · Simulación</span>
   </div>
 </main>
@@ -176,11 +185,11 @@ MAT.forEach((m,i)=>{
   a.className="card";a.id="c"+i;
   a.innerHTML='<header><div><h2>'+m+'</h2><div class="card-sub-ent">0 de 6 entregadas</div></div><span class="chip"></span></header>'+
     [0,1,2].map(k=>'<div class="corte"><span class="lbl">'+CORTES[k]+'</span><div class="ins">'+
-      [0,1].map(j=>'<div class="eval-cell">'+
-        '<input inputmode="decimal" autocomplete="off" data-i="'+i+'" data-j="'+(2*k+j)+'" aria-label="'+m+', '+CORTES[k]+', nota '+(j+1)+'" placeholder="–">'+
-        '<div class="eval-meta"><small>'+Math.round(W[k][j]*100)+'%</small>'+
-        '<button type="button" class="btn-ent" data-i="'+i+'" data-j="'+(2*k+j)+'" title="Marcar si ya entregaste esta evaluación"><span class="ent-ic">○</span> <span class="ent-txt">Por entregar</span></button>'+
-        '</div></div>').join("")+
+      [0,1].map(j=>'<div class="eval-box">'+
+        '<div class="eval-top"><small>'+Math.round(W[k][j]*100)+'%</small></div>'+
+        '<input inputmode="decimal" class="grade-inp" autocomplete="off" data-i="'+i+'" data-j="'+(2*k+j)+'" aria-label="'+m+', '+CORTES[k]+', nota '+(j+1)+'" placeholder="–">'+
+        '<label class="ent-check" title="Marca la casilla si ya entregaste esta evaluación"><input type="checkbox" class="chk-ent" data-i="'+i+'" data-j="'+(2*k+j)+'"><span class="chk-txt">Entregada</span></label>'+
+        '</div>').join("")+
       '</div><b class="tot"></b></div>').join("")+
     '<footer><div><span>Acumulado</span><b class="K"></b></div><div><span>Definitiva</span><b class="L"></b></div></footer>'+
     '<div class="pred"><div class="pred-head"><div class="pred-main"></div><button type="button" class="btn-sim" data-i="'+i+'">⚡ Simular</button></div><div class="pred-sub"></div></div>';
@@ -194,35 +203,37 @@ function paint(i){
   const effRow=S[i].map((v,j)=>v!==null?v:SIM[i][j]);
   const c=isSim?calc(effRow):realC;
 
-  $$("input",a).forEach(inp=>{
+  $$("input.grade-inp",a).forEach(inp=>{
     const j=+inp.dataset.j;
     const isGraded=S[i][j]!==null;
-    const isDelivered=isGraded||Boolean(D[i][j]);
     if(isGraded){
-      inp.className=cls(S[i][j]);
+      inp.className="grade-inp "+cls(S[i][j]);
     }else if(SIM[i][j]!==null){
-      inp.className="sim";
+      inp.className="grade-inp sim";
     }else{
-      inp.className=isDelivered?"is-delivered":"";
+      inp.className="grade-inp";
     }
   });
 
-  $$(".btn-ent",a).forEach(btn=>{
-    const j=+btn.dataset.j;
+  $$(".chk-ent",a).forEach(chk=>{
+    const j=+chk.dataset.j;
     const isGraded=S[i][j]!==null;
     const isDelivered=isGraded||Boolean(D[i][j]);
-    if(isGraded){
-      btn.className="btn-ent graded";
-      btn.innerHTML='<span class="ent-ic">✓</span> <span class="ent-txt">Calificada</span>';
-      btn.title="Calificada con "+f2(S[i][j]);
-    }else if(isDelivered){
-      btn.className="btn-ent done";
-      btn.innerHTML='<span class="ent-ic">✓</span> <span class="ent-txt">Entregada</span>';
-      btn.title="Entregada · Esperando calificación (clic para desmarcar)";
-    }else{
-      btn.className="btn-ent";
-      btn.innerHTML='<span class="ent-ic">○</span> <span class="ent-txt">Por entregar</span>';
-      btn.title="Clic para marcar como entregada";
+    chk.checked=isDelivered;
+    const box=chk.closest(".eval-box");
+    if(box){
+      box.classList.toggle("is-delivered",isDelivered&&!isGraded);
+      box.classList.toggle("is-graded",isGraded);
+    }
+    const txt=chk.parentElement.querySelector(".chk-txt");
+    if(txt){
+      if(isGraded){
+        txt.textContent="Calificada";
+      }else if(isDelivered){
+        txt.textContent="Entregada ✓";
+      }else{
+        txt.textContent="Entregada";
+      }
     }
   });
 
@@ -353,7 +364,7 @@ function summary(){
 }
 
 function fill(i){
-  $$("input",$("#c"+i)).forEach(inp=>{
+  $$("input.grade-inp",$("#c"+i)).forEach(inp=>{
     if(document.activeElement===inp)return;
     const j=+inp.dataset.j;
     const v=S[i][j];
@@ -410,17 +421,17 @@ function updateSimAllBtn(){
   btn.classList.toggle("active",anySim);
 }
 
+grid.addEventListener("change",e=>{
+  const chk=e.target.closest(".chk-ent");
+  if(!chk)return;
+  const i=+chk.dataset.i,j=+chk.dataset.j;
+  D[i][j]=chk.checked;
+  paint(i);
+  summary();
+  queueSave();
+});
+
 grid.addEventListener("click",e=>{
-  const btnEnt=e.target.closest(".btn-ent");
-  if(btnEnt){
-    const i=+btnEnt.dataset.i,j=+btnEnt.dataset.j;
-    if(S[i][j]!==null)return;
-    D[i][j]=!D[i][j];
-    paint(i);
-    summary();
-    queueSave();
-    return;
-  }
   const btn=e.target.closest(".btn-sim");
   if(!btn)return;
   const i=+btn.dataset.i;
@@ -448,7 +459,7 @@ const setStatus=t=>{$("#st").textContent=t};
 
 grid.addEventListener("input",e=>{
   const t=e.target;
-  if(!t.dataset.j)return;
+  if(!t.dataset.j||!t.classList.contains("grade-inp"))return;
   const i=+t.dataset.i,j=+t.dataset.j,s=t.value.replace(",",".").trim();
   let n=null,bad=false;
   if(s!==""){n=Number(s);if(isNaN(n)||n<0||n>20){n=null;bad=true}}
